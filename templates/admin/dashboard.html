@@ -1,0 +1,115 @@
+{% extends "base_admin.html" %}
+{% block title %}Dashboard Admin - Take Home{% endblock %}
+{% block content %}
+<div class="page">
+    <div class="page-wrapper">
+        <!-- Page header -->
+        <div class="page-header d-print-none">
+            <div class="container-xl">
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        <!-- Page pre-title -->
+                        <div class="page-pretitle">
+                            Overview
+                        </div>
+                        <h2 class="page-title">
+                            Dashboard
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Page body -->
+        <div class="page-body">
+            <div class="container-xl">
+                <div class="row row-deck row-cards">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Kategori</h3>
+                            </div>
+                            <table class="table card-table table-vcenter">
+                                <thead>
+                                    <tr>
+                                        <th>Kategori Barang</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for k in kategori %}
+                                    <tr>
+                                        <td class="w-1 fw-bold">{{ k.nama_kategori }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Daftar Barang</h3>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table card-table table-vcenter">
+                                    <thead>
+                                        <tr>
+                                            <th>Gambar</th>
+                                            <th>Nama Barang</th>
+                                            <th>Harga</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="barang-table">
+                                        {% for b in barang %}
+                                        <tr>
+                                            <td>
+                                                <img src="{{ url_for('static', filename='uploads/profile_pics/' ~ b.gambar_produk) }}"
+                                                    alt="Profile Pic" class="mt-2" style="width: 100px; height: 100px;">
+                                            </td>
+                                            <td>{{ b.nama_produk }}</td>
+                                            <td>{{ b['harga'] | rupiah }}</td>
+                                            <td>{{ b.stok }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table class="table card-table table-vcenter text-nowrap datatable">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Nama</th>
+                                                <th>Alamat</th>
+                                                <th>Jumlah</th>
+                                                <th>Total</th>
+                                                <th>Waktu</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="barang-table">
+                                            {% for t in transaksi %}
+                                            <tr>
+                                                <td>{{ t.order_number }}</td>
+                                                <td>{{ t.username }}</td>
+                                                <td>{{ t.payment_alamat }}</td>
+                                                <td>{{ t.jumlah }}</td>
+                                                <td>{{ t.total }}</td>
+                                                <td>{{ t.created_at }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

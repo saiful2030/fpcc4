@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Register - Take Home{% endblock %}
+{% block content %}
+<div class="page page-center">
+    <div class="container container-tight py-4">
+        <div class="text-center mb-4">
+            <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
+                <img src="{{ url_for('static', filename='img/logo2.png') }}" height="36" alt="">
+            </a>
+        </div>
+
+        {% if get_flashed_messages() %}
+        <div class="alert alert-danger">
+            {% for message in get_flashed_messages() %}
+            <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form class="card card-md" action="{{ url_for('register') }}" method="POST" autocomplete="off" novalidate
+            enctype="multipart/form-data">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Create new account</h2>
+                <div class="mb-3">
+                    <label class="form-label">Profile Picture</label>
+                    <input type="file" class="form-control" name="profile_pic" accept="image/*">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" placeholder="Masukkan Nama Anda" name="username">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email address</label>
+                    <input type="email" class="form-control" placeholder="Masukkan Email Anda" name="email">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <div class="input-group input-group-flat">
+                        <input type="password" class="form-control" placeholder="Masukkan password Anda"
+                            autocomplete="off" name="password">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-check">
+                        <input type="checkbox" class="form-check-input" id="agree-checkbox" />
+                        <span class="form-check-label">
+                            Agree the <a href="./terms-of-service.html" tabindex="-1">terms and policy</a>.
+                        </span>
+                    </label>
+                    <div id="notification" class="text-danger mt-1" style="display: none;">
+                        You must agree to the terms and policy!
+                    </div>
+                </div>
+                <div class="form-footer">
+                    <button type="submit" id="submit-button" class="btn btn-primary w-100" disabled>
+                        Create new account
+                    </button>
+                </div>
+            </div>
+        </form>
+        <div class="text-center text-secondary mt-3">
+            Already have account? <a href="/login/" tabindex="-1">Sign in</a>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkbox = document.getElementById('agree-checkbox');
+        const submitButton = document.getElementById('submit-button');
+        const notification = document.getElementById('notification');
+
+        checkbox.addEventListener('change', function () {
+            if (checkbox.checked) {
+                submitButton.disabled = false;
+                notification.style.display = 'none';
+            } else {
+                submitButton.disabled = true;
+                notification.style.display = 'block';
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,355 @@
+{% extends "base_user.html" %}
+
+{% block title %}Keranjang Belanja{% endblock %}
+
+{% block content %}
+<style>
+    .btn.disabled {
+        pointer-events: none;
+        /* Nonaktifkan interaksi dengan tombol */
+        opacity: 0.5;
+        /* Tampilkan tombol dalam status tidak aktif */
+    }
+</style>
+<div class="container my-4">
+    <h2 class="mb-4">Keranjang</h2>
+    <br>
+    <a href="{{ url_for('dashboard_buyer') }}" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-left">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M5 12l14 0" />
+            <path d="M5 12l6 6" />
+            <path d="M5 12l6 -6" /></svg>
+    </a>
+    <br>
+    <br>
+    <br>
+    <div class="row">
+        <!-- Daftar Produk -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <input type="checkbox" class="form-check-input me-2" id="checkAll">
+                        <label for="checkAll" class="mb-0">Pilih Semua ({{ cart_items|length }})</label>
+                        <a href="#" class="ms-auto text-danger text-decoration-none" id="hapus-semua">Hapus</a>
+                    </div>
+                    <hr>
+                    <div id="cart-items-container">
+                        {% for item in cart_items %}
+                        <div class="d-flex align-items-center mb-3" id="cart-item-{{ item['cart_id'] }}">
+                            <input type="checkbox" class="form-check-input me-3" data-id="{{ item['cart_id'] }}">
+                            <img src="{{ url_for('static', filename='uploads/profile_pics/' + item['gambar_produk']) }}"
+                                alt="{{ item['nama_produk'] }}" class="rounded" style="width: 100px; height: 100px;">
+                            <div class="ms-3">
+                                <h5 class="mb-1">{{ item.nama_produk }}</h5>
+                                <p class="mb-0 text fw-bold">{{ item.harga }}</p>
+                            </div>
+                            <div class="ms-auto">
+                                <div class="d-flex align-items-center flex-column">
+                                    <div class="d-flex align-items-center">
+                                        <button class="btn btn-outline-primary btn-decrement"
+                                            data-id="{{ item['cart_id'] }}">-</button>
+                                        <span class="mx-2"
+                                            id="jumlah-{{ item['cart_id'] }}">{{ item['jumlah_barang'] }}</span>
+                                        <button class="btn btn-outline-primary btn-increment"
+                                            data-id="{{ item['cart_id'] }}">+</button>
+                                    </div>
+                                    <a href="#" class="btn btn-outline-danger btn-delete mt-2"
+                                        data-id="{{ item['cart_id'] }}">Hapus</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Ringkasan Belanja -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3">Ringkasan Belanja</h5>
+                    <p class="d-flex justify-content-between mb-2">
+                        <span>Total</span>
+                        <span class="fw-bold" id="total-harga">{{ total_harga }}</span>
+                    </p>
+                    <a href="/checkout" class="btn btn-primary w-100" type="button" id="checkout-button"
+                        {% if cart_items|length == 0 %}class="disabled" {% endif %}>
+                        Checkout
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Konfirmasi Hapus Produk -->
+<div class="modal fade" id="modalHapusProduk" tabindex="-1" aria-labelledby="modalHapusProdukLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalHapusProdukLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus item ini?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Notifikasi Produk -->
+<div class="modal fade" id="modalPilihProduk" tabindex="-1" aria-labelledby="modalPilihProdukLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalPilihProdukLabel">Perhatian</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Silakan pilih produk terlebih dahulu untuk mengubah jumlah!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+        // Aksi hapus atau pengolahan data dapat dilakukan di sini
+        location.reload(); // Halaman akan di-refresh
+    });
+</script>
+<script>
+    function updateCheckoutButton() {
+        const checkoutButton = document.getElementById('checkout-button');
+        const cartItems = document.querySelectorAll('#cart-items-container .d-flex'); // Menemukan semua item keranjang
+
+        if (cartItems.length === 0) {
+            checkoutButton.classList.add('disabled'); // Tambahkan kelas disabled jika keranjang kosong
+        } else {
+            checkoutButton.classList.remove('disabled'); // Hapus kelas disabled jika ada item di keranjang
+        }
+    }
+
+    // Panggil fungsi untuk memperbarui status tombol checkout saat jumlah item di keranjang berubah
+    updateCheckoutButton();
+</script>
+<script>
+    const updateCartItem = (cartId, action) => {
+        const checkbox = document.querySelector(`input[type="checkbox"][data-id="${cartId}"]`);
+        if (!checkbox.checked) {
+            // Tampilkan modal jika produk belum dipilih
+            $('#modalPilihProduk').modal('show');
+            return; // Jangan lanjutkan jika belum dipilih
+        }
+
+        fetch('/update_cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    cart_id: cartId,
+                    action: action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const jumlahElement = document.getElementById(`jumlah-${cartId}`);
+                    jumlahElement.textContent = data.new_quantity;
+                    updateTotalHarga(); // Perbarui total harga setelah perubahan
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    };
+</script>
+<script type="text/javascript">
+    var payButton = document.getElementById('pay-button');
+
+    // Pastikan snap_token sudah ada sebelum tombol dibuka
+    if ("{{ snap_token }}" !== "") {
+        payButton.addEventListener('click', function () {
+            snap.pay("{{ snap_token }}", {
+                onSuccess: function (result) {
+                    alert("Pembayaran berhasil!");
+                    // Redirect or update the UI based on payment result
+                },
+                onPending: function (result) {
+                    alert("Pembayaran pending.");
+                },
+                onError: function (result) {
+                    alert("Pembayaran gagal.");
+                }
+            });
+        });
+    } else {
+        console.error("Snap Token is not available");
+    }
+</script>
+
+<!-- Tambahkan jQuery dan Bootstrap (jika belum ada) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Fungsi untuk menghapus item dari keranjang
+        const deleteCartItem = (cartId) => {
+            fetch('/cart/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cart_id: cartId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Hapus elemen HTML item dari DOM
+                        const cartItemElement = document.getElementById(`cart-item-${cartId}`);
+                        if (cartItemElement) {
+                            cartItemElement.remove();
+                        }
+                        updateTotalHarga(); // Perbarui total harga setelah item dihapus
+                    } else {
+                        console.error('Error deleting cart item:', data.error || 'Unknown error');
+                    }
+                })
+                .catch(error => console.error('Fetch error:', error));
+        };
+
+        // Menambahkan event listener ke tombol "Hapus"
+        let cartIdToDelete = null; // Variable untuk menyimpan cart_id yang akan dihapus
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault(); // Mencegah navigasi default
+                cartIdToDelete = this.dataset.id; // Ambil cart_id dari atribut data-id
+                // Tampilkan modal konfirmasi
+                $('#modalHapusProduk').modal('show');
+            });
+        });
+
+        // Event listener untuk tombol "Hapus" di modal konfirmasi
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+            if (cartIdToDelete) {
+                deleteCartItem(cartIdToDelete); // Hapus item dari keranjang
+                $('#modalHapusProduk').modal('hide'); // Sembunyikan modal setelah menghapus
+            }
+        });
+    });
+</script>
+<script>
+    // Fungsi untuk memperbarui total harga
+    function updateTotalHarga() {
+        fetch('/update_total_harga', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.total_harga !== undefined) {
+                    const totalHarga = new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR'
+                    }).format(data.total_harga);
+                    document.getElementById('total-harga').textContent = totalHarga;
+                } else {
+                    console.error("Error updating total harga:", data.error || "Unknown error");
+                }
+            })
+            .catch(error => console.error("Fetch error:", error));
+    }
+
+    // Event listener untuk memanipulasi keranjang belanja
+    document.addEventListener('DOMContentLoaded', function () {
+        // Fungsi untuk memperbarui item keranjang (tambah atau kurangi jumlah)
+        const updateCartItem = (cartId, action) => {
+            const checkbox = document.querySelector(`input[type="checkbox"][data-id="${cartId}"]`);
+            if (!checkbox.checked) {
+                // Tampilkan modal jika produk belum dipilih
+                $('#modalPilihProduk').modal('show');
+                return;
+            }
+
+            fetch('/update_cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cart_id: cartId,
+                        action: action
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const jumlahElement = document.getElementById(`jumlah-${cartId}`);
+                        jumlahElement.textContent = data.new_quantity;
+                        updateTotalHarga(); // Perbarui total harga setelah perubahan
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        };
+
+        // Menambahkan event listener untuk tombol tambah dan kurangi jumlah barang
+        document.querySelectorAll('.btn-decrement, .btn-increment').forEach(button => {
+            button.addEventListener('click', function () {
+                const cartId = this.dataset.id;
+                const action = this.classList.contains('btn-increment') ? 'increment' :
+                    'decrement';
+                updateCartItem(cartId, action);
+            });
+        });
+
+        // Menambahkan event listener untuk menghapus semua produk dari keranjang
+        document.getElementById('hapus-semua').addEventListener('click', () => {
+            fetch('/cart/delete_all', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    }
+                });
+        });
+
+        // Fungsi untuk memilih semua item
+        const checkAll = document.getElementById('checkAll');
+        const cartItemsCheckboxes = document.querySelectorAll('#cart-items-container input[type="checkbox"]');
+
+        // Update checkbox 'Pilih Semua' jika semua item dicentang
+        checkAll.addEventListener('change', function () {
+            const isChecked = checkAll.checked;
+            cartItemsCheckboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+            });
+        });
+
+        // Pastikan 'Pilih Semua' tidak tercentang jika ada item yang tidak tercentang
+        cartItemsCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                // Jika ada satu item yang tidak dicentang, maka uncheck 'Pilih Semua'
+                checkAll.checked = [...cartItemsCheckboxes].every(cb => cb.checked);
+            });
+        });
+    });
+</script>
+{% endblock %}

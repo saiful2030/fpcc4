@@ -1,0 +1,101 @@
+{% extends "base_user.html" %}
+
+{% block title %}HistoriTransaksi- Take Home{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-wrapper">
+        <div class="page-header d-print-none">
+            <div class="container-xl">
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        <div class="page-pretitle">
+                            Overview
+                        </div>
+                        <h2 class="page-title">
+                            Transaksi
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-body">
+            <div class="container-xl">
+                <div class="row row-cards">
+                    <div class="col-lg-12">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Daftar Transaksi</h3>
+                                    <div class="ms-auto text-secondary">
+                                        <div class="ms-auto text-secondary">
+                                            <a href="/export/csv" class="btn btn-primary btn-sm">Export CSV</a>
+                                            <a href="/export/excel" class="btn btn-success btn-sm">Export Excel</a>
+                                            <a href="/export/pdf" class="btn btn-danger btn-sm">Export PDF</a>
+                                            <button class="btn btn-info btn-sm" onclick="window.print()">Print</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body border-bottom py-3">
+                                    <div class="d-flex">
+                                        <div class="ms-auto text-secondary">
+                                            Search:
+                                            <div class="ms-2 d-inline-block">
+                                                <input type="text" id="search-input"
+                                                    class="form-control form-control-sm" aria-label="Search barang">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table card-table table-vcenter text-nowrap datatable">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Total</th>
+                                                <th>Waktu</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="barang-table">
+                                            {% for t in transaksi %}
+                                            <tr>
+                                                <td>{{ t.order_number }}</td>
+                                                <td>{{ t['total'] | rupiah }}</td>
+
+                                                <td>{{ t.created_at }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("search-input");
+        const table = document.getElementById("barang-table");
+        const rows = table.querySelectorAll("tr");
+
+        searchInput.addEventListener("input", function () {
+            const query = searchInput.value.toLowerCase();
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                const rowText = Array.from(cells).map(cell => cell.textContent.toLowerCase())
+                    .join(" ");
+                if (rowText.includes(query)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

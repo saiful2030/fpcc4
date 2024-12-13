@@ -1,0 +1,211 @@
+{% extends "base_admin.html" %}
+
+{% block title %}kategori Barang - Take Home{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-wrapper">
+        <div class="page-header d-print-none">
+            <div class="container-xl">
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        <div class="page-pretitle">
+                            Overview
+                        </div>
+                        <h2 class="page-title">
+                            Barang
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-body">
+            <div class="container-xl">
+                <div class="row row-cards">
+                    <div class="col-lg-12">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Daftar Barang</h3>
+                                    <div class="ms-auto text-secondary">
+                                        <div class="ms-2 d-inline-block">
+                                            <a href="#" class="btn btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#modal-small">
+                                                Tambah kategori
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body border-bottom py-3">
+                                    <div class="d-flex">
+                                        <div class="ms-auto text-secondary">
+                                            Search:
+                                            <div class="ms-2 d-inline-block">
+                                                <input type="text" id="search-input"
+                                                    class="form-control form-control-sm" aria-label="Search invoice">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table card-table table-vcenter text-nowrap datatable">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Kategori Barang</th>
+                                                <th class="text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for k in kategori %}
+                                            <tr>
+                                                <td class="w-1 fw-bold">{{ k.id }}</td>
+                                                <td class="w-1 fw-bold">{{ k.nama_kategori }}</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="btn btn-warning" data-bs-toggle="modal"
+                                                        data-bs-target="#modal-edit" data-kategori-id="{{ k.id }}"
+                                                        data-kategori-name="{{ k.nama_kategori }}">Ubah</a>
+                                                    <a href="#" class="btn btn-danger" data-bs-toggle="modal"
+                                                        data-bs-target="#deleteModal"
+                                                        data-kategori-id="{{ k.id }}">Delete</a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal modal-blur fade" id="modal-small" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Tambah Kategori Barang</div>
+                <form action="{{ url_for('tambah_kategori') }}" method="POST" enctype="multipart/form-data"
+                    autocomplete="off" novalidate id="kategoriForm">
+                    <div class="row g-3">
+                        <div class="col-md">
+                            <div class="form-label">Kategori Barang</div>
+                            <input type="text" class="form-control" placeholder="Masukkan Kategori" name="kategori"
+                                required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="submit-button" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('submit-button').addEventListener('click', function () {
+        document.getElementById('kategoriForm').submit();
+        var myModal = new bootstrap.Modal(document.getElementById('modal-small'));
+        myModal.hide();
+    });
+</script>
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this category?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <!-- Form POST untuk menghapus kategori -->
+                <form id="deleteForm" method="POST" action="">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const kategoriId = button.getAttribute('data-kategori-id'); // Ambil ID kategori yang akan dihapus
+        const deleteForm = document.getElementById('deleteForm');
+        deleteForm.action =
+            `/hapus_kategori/${kategoriId}`; // Atur action form untuk mengarah ke route hapus kategori
+    });
+</script>
+
+<!-- Modal Edit Kategori -->
+<div class="modal modal-blur fade" id="modal-edit" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Edit Kategori Barang</div>
+                <!-- Form untuk mengedit kategori -->
+                <form action="/edit_kategori/{{ kategori.id }}" method="POST">
+                    <div class="mb-3">
+                        <label for="kategori" class="form-label">Kategori Barang</label>
+                        <input type="text" class="form-control" id="kategori" name="kategori"
+                            value="{{ kategori.nama_kategori }}" required>
+                    </div>
+                    <!-- Tombol submit untuk menyimpan perubahan -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const editModal = document.getElementById('modal-edit');
+    editModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget; // Button that triggered the modal
+        const kategoriId = button.getAttribute('data-kategori-id'); // Get the category ID
+        const kategoriName = button.getAttribute('data-kategori-name'); // Get the category name
+
+        const form = editModal.querySelector('form');
+        const input = form.querySelector('input[name="kategori"]');
+        input.value = kategoriName; // Set the input value to the current category name
+        form.action = `/edit_kategori/${kategoriId}`; // Set the form action to the correct URL
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("search-input");
+        const table = document.querySelector(".table"); // Ambil tabel
+        const rows = table.querySelectorAll("tbody tr"); // Ambil semua baris dalam tbody
+
+        searchInput.addEventListener("input", function () {
+            const query = searchInput.value
+                .toLowerCase(); // Ambil nilai pencarian dan ubah menjadi lowercase
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td"); // Ambil semua sel pada baris
+                const rowText = Array.from(cells).map(cell => cell.textContent
+                        .toLowerCase()) // Gabungkan semua teks di sel
+                    .join(" ");
+
+                // Jika rowText mencakup query, tampilkan baris, jika tidak sembunyikan
+                if (rowText.includes(query)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+    });
+</script>
+
+
+{% endblock %}

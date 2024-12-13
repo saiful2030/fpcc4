@@ -1,0 +1,219 @@
+{% extends "base_user.html" %}
+
+{% block title %}Lengkapi Data Anda - Take Home{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-wrapper">
+        <!-- Page header -->
+        <div class="page-header d-print-none">
+            <div class="container-xl">
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        <h2 class="page-title">
+                            Lengkapi Data Anda
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Page body -->
+        <div class="page-body">
+            <div class="container-xl">
+                <div class="card">
+                    <div class="row g-0">
+                        <div class="col-12 col-md-3 border-end">
+                            <div class="card-body">
+                                <h4 class="subheader">Data Anda</h4>
+                                <div class="list-group list-group-transparent">
+                                    <a href="#"
+                                        class="list-group-item list-group-item-action d-flex align-items-center active">
+                                        My Account
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-9 d-flex flex-column">
+                            <div class="card-body">
+                                <h2 class="mb-4">My Account</h2>
+                                <h3 class="card-title">Profile Details</h3>
+                                <form action="{{ url_for('lengkapi_data', user_id=user_data['user_id']) }}"
+                                    method="POST" enctype="multipart/form-data">
+                                    <div class="row align-items-center">
+                                        <div class="form-label">Foto Profile</div>
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <img src="{{ url_for('static', filename='uploads/profile_pics/' + (user_data['profile_pic'] if user_data['profile_pic'] else 'default.jpg')) }}"
+                                                    alt="Profile Picture" class="img-fluid"
+                                                    style="max-width: 150px; max-height: 150px;">
+                                            </div>
+                                            <div class="ms-3">
+                                                <input type="file" class="form-control" id="profile_pic"
+                                                    name="profile_pic" accept="image/*">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h3 class="card-title mt-4">Profile</h3>
+                                    <div class="row g-3">
+                                        <div class="col-md">
+                                            <div class="form-label">Nomor HP</div>
+                                            <div class="d-flex">
+                                                <input type="text" class="form-control" id="nomer_hp" name="nomer_hp"
+                                                    value="{{ user_data['nomer_hp'] }}" required>
+                                                <button type="button" class="btn btn-primary ms-2"
+                                                    id="verify_hp_btn">Kirim OTP</button>
+                                            </div>
+                                            <div id="error_message"
+                                                style="display: none; color: red; margin-top: 10px;"></div>
+                                        </div>
+
+                                        <!-- OTP Form (Initially Hidden) -->
+                                        <div class="col-md" id="otp_section" style="display: none;">
+                                            <div class="form-label">Masukkan OTP</div>
+                                            <div class="d-flex">
+                                                <input type="text" class="form-control" id="otp_code" name="otp_code"
+                                                    placeholder="Masukkan OTP" disabled>
+                                                <button type="button" class="btn btn-success ms-2" id="check_otp_btn"
+                                                    disabled>Verifikasi OTP</button>
+                                            </div>
+                                            <div id="otp_error_message"
+                                                style="display: none; color: red; margin-top: 10px;"></div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md">
+                                            <div class="form-label">Alamat</div>
+                                            <!-- Google Maps Autocomplete -->
+                                            <input type="text" class="form-control" id="alamat" name="alamat"
+                                                value="{{ user_data['alamat'] }}" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <div class="card-footer bg-transparent mt-auto">
+                                        <div class="btn-list justify-content-end">
+                                            <a href="{{ url_for('dashboard_buyer') }}"
+                                                class="btn btn-secondary">Batal</a>
+                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal for OTP Notification -->
+<div class="modal fade" id="otpNotificationModal" tabindex="-1" aria-labelledby="otpNotificationModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="otpNotificationModalLabel">Notifikasi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                OTP telah dikirim!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Tambahkan jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Tambahkan Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Ketika nomor HP dimasukkan, tampilkan bagian OTP
+    document.getElementById('nomer_hp').addEventListener('input', function () {
+        const nomerHp = document.getElementById('nomer_hp').value;
+        const otpSection = document.getElementById('otp_section');
+        const verifyHpBtn = document.getElementById('verify_hp_btn');
+
+        if (nomerHp.trim() !== '') {
+            otpSection.style.display = 'block';
+            verifyHpBtn.style.display = 'inline-block';
+        } else {
+            otpSection.style.display = 'none';
+            verifyHpBtn.style.display = 'none';
+        }
+    });
+
+    document.getElementById('verify_hp_btn').addEventListener('click', function () {
+        const nomerHp = document.getElementById('nomer_hp').value;
+        const errorMessageElement = document.getElementById('error_message');
+
+        if (!nomerHp) {
+            errorMessageElement.style.display = 'block';
+            errorMessageElement.textContent = "Masukkan nomor HP untuk verifikasi.";
+            return;
+        }
+
+        fetch('/send_otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nomer_hp: nomerHp
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    errorMessageElement.style.display = 'none';
+                    // Tampilkan modal OTP telah dikirim
+                    $('#otpNotificationModal').modal('show');
+                    document.getElementById('otp_code').disabled = false;
+                    document.getElementById('check_otp_btn').disabled = false;
+                } else {
+                    errorMessageElement.style.display = 'block';
+                    errorMessageElement.textContent = "Gagal mengirim OTP: " + data.message;
+                }
+            })
+            .catch(error => {
+                errorMessageElement.style.display = 'block';
+                errorMessageElement.textContent = "Terjadi kesalahan: " + error.message;
+            });
+    });
+</script>
+<script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC-a1vY762CU3YRUEPVEXHjsPPSAKeQdw0&libraries=places&callback=initAutocomplete"
+    async defer></script>
+<script>
+    // Function to initialize Google Maps Autocomplete
+    function initAutocomplete() {
+        const autocomplete = new google.maps.places.Autocomplete(
+            document.getElementById('alamat'), {
+                types: ['geocode'],
+                componentRestrictions: {
+                    country: 'id'
+                } // Restrict to Indonesia
+            });
+
+        autocomplete.addListener('place_changed', function () {
+            const place = autocomplete.getPlace();
+            if (place.geometry) {
+                // Automatically fill the address input field with the place's formatted address
+                document.getElementById('alamat').value = place.formatted_address;
+            }
+        });
+    }
+
+    // Button to open Google Maps for selecting location
+    document.getElementById('open_map_btn').addEventListener('click', function () {
+        // Open Google Maps with location picker
+        const mapUrl =
+            "https://www.google.com/maps/@-6.2088,106.8456,15z?hl=id"; // Adjust default location here
+        window.open(mapUrl, '_blank');
+    });
+</script>
+{% endblock %}

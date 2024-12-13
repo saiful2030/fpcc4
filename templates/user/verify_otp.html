@@ -1,0 +1,20 @@
+{% extends "base_user.html" %}
+
+{% block title %}Verifikasi OTP{% endblock %}
+
+{% block content %}
+<div class="container-xl">
+    <div class="card">
+        <div class="card-body">
+            <h2>Verifikasi Nomor HP</h2>
+            <form action="{{ url_for('verify_otp', user_id=user_id) }}" method="POST">
+                <div class="mb-3">
+                    <label for="otp" class="form-label">Masukkan OTP yang dikirim ke nomor Anda</label>
+                    <input type="text" class="form-control" id="otp" name="otp" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Verifikasi</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

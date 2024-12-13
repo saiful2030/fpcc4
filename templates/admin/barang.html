@@ -1,0 +1,156 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Stok Barang - Take Home{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-wrapper">
+        <div class="page-header d-print-none">
+            <div class="container-xl">
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        <div class="page-pretitle">
+                            Overview
+                        </div>
+                        <h2 class="page-title">
+                            Barang
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-body">
+            <div class="container-xl">
+                <div class="row row-cards">
+                    <div class="col-lg-12">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Daftar Barang</h3>
+                                    <div class="ms-auto text-secondary">
+                                        <div class="ms-2 d-inline-block">
+                                            <a href="/tambah_barang/" class="btn btn-primary">
+                                                Tambah barang
+                                            </a>
+                                            <br>
+                                            <br>
+                                            <a href="/export/csv" class="btn btn-primary btn-sm">Export CSV</a>
+                                            <a href="/export/excel" class="btn btn-success btn-sm">Export Excel</a>
+                                            <a href="/export/pdf" class="btn btn-danger btn-sm">Export PDF</a>
+                                            <button class="btn btn-info btn-sm" onclick="window.print()">Print</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body border-bottom py-3">
+                                    <div class="d-flex">
+                                        <div class="ms-auto text-secondary">
+                                            Search:
+                                            <div class="ms-2 d-inline-block">
+                                                <input type="text" id="search-input"
+                                                    class="form-control form-control-sm" aria-label="Search barang">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table card-table table-vcenter text-nowrap datatable">
+                                        <thead>
+                                            <tr>
+                                                <th>No. </th>
+                                                <th>Gambar</th>
+                                                <th>Nama Barang</th>
+                                                <th>Deskripsi</th>
+                                                <th>Kategori</th>
+                                                <th>Harga</th>
+                                                <th>Stok</th>
+                                                <th class="text-center">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="barang-table">
+                                            {% for b in barang %}
+                                            <tr>
+                                                <td>{{ b.product_id }}</td>
+                                                <td>
+                                                    <img src="{{ url_for('static', filename='uploads/profile_pics/' ~ b.gambar_produk) }}"
+                                                        alt="Profile Pic" class="mt-2"
+                                                        style="width: 100px; height: 100px;">
+                                                </td>
+                                                <td>{{ b.nama_produk }}</td>
+                                                <td>{{ b.teks_deskripsi }}</td>
+                                                <td>{{ b.nama_kategori }}</td>
+                                                <td>{{ b['harga'] | rupiah }}</td>
+                                                <td>{{ b.stok }}</td>
+                                                <td class="text-center">
+                                                    <a href="{{ url_for('edit_barang', product_id=b.product_id) }}"
+                                                        class="btn btn-warning">
+                                                        Ubah
+                                                    </a>
+                                                    <a href="#" class="btn btn-danger" data-bs-toggle="modal"
+                                                        data-bs-target="#deleteModalBarang"
+                                                        data-barang-id="{{ b.product_id }}">Delete</a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteModalBarang" tabindex="-1" aria-labelledby="deleteModalBarangLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalBarangLabel">Hapus Barang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menghapus barang ini?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteBarangForm" method="POST" action="">
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const deleteBarangModal = document.getElementById('deleteModalBarang');
+    deleteBarangModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const barangId = button.getAttribute('data-barang-id');
+
+        const form = document.getElementById('deleteBarangForm');
+        form.action = `/hapus_barang/${barangId}`;
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("search-input");
+        const table = document.getElementById("barang-table");
+        const rows = table.querySelectorAll("tr");
+
+        searchInput.addEventListener("input", function () {
+            const query = searchInput.value.toLowerCase();
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                const rowText = Array.from(cells).map(cell => cell.textContent.toLowerCase())
+                    .join(" ");
+                if (rowText.includes(query)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

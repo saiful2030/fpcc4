@@ -1,0 +1,74 @@
+{% extends "base_admin.html" %}
+{% block title %}Edit Admin - Take Home{% endblock %}
+{% block content %}
+<div class="page-body">
+    <div class="container-xl">
+        <div class="card">
+            <div class="row g-0">
+                <div class="col-12 col-md-9 d-flex flex-column">
+                    <div class="card-body">
+                        <form action="{{ url_for('edit_user_admin', user_id=user.id) }}" method="POST"
+                            enctype="multipart/form-data" autocomplete="off" novalidate>
+                            <h3 class="card-title">Edit Profile</h3>
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    {% if user.profile_pic %}
+                                    <img src="{{ url_for('static', filename='uploads/profile_pics/' ~ user.profile_pic) }}"
+                                        alt="Profile Pic" class="mt-2" style="width: 100px; height: 100px;">
+                                    {% endif %}
+                                    <input type="file" class="form-control" name="profile_pic" />
+                                    <small class="form-hint">Biarkan kosong untuk menyimpan gambar profil saat
+                                        ini.</small>
+                                </div>
+                            </div>
+                            <h3 class="card-title mt-4">Profile</h3>
+                            <div class="row g-3">
+                                <div class="col-md">
+                                    <div class="form-label">Username</div>
+                                    <input type="text" class="form-control" value="{{ user.username }}" name="username"
+                                        required>
+                                </div>
+                                <div class="col-md">
+                                    <div class="form-label">Email</div>
+                                    <input type="email" class="form-control" value="{{ user.email }}" name="email"
+                                        required>
+                                </div>
+                                <div class="col-md">
+                                    <div class="form-label">Password</div>
+                                    <input type="password" class="form-control"
+                                        placeholder="Masukkan password baru (opsional)" name="password">
+                                    <small class="form-hint">Biarkan kosong untuk menyimpan password saat
+                                        ini.</small>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row g-3">
+                                <div class="col-md">
+                                    <div class="form-label">Alamat</div>
+                                    <input type="text" class="form-control" value="{{ user.alamat }}" name="alamat"
+                                        required>
+                                </div>
+                                <div class="col-md">
+                                    <div class="form-label">Nomor HP</div>
+                                    <input type="text" class="form-control" value="{{ user.nomer_hp }}" name="nomer"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent mt-auto">
+                                <div class="btn-list justify-content-end">
+                                    <a href="/dashboard_user/" class="btn">
+                                        Cancel
+                                    </a>
+                                    <button type="submit" id="submit-button" class="btn btn-primary">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

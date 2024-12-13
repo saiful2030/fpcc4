@@ -1,0 +1,77 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Tambah Barang - Take Home{% endblock %}
+
+{% block content %}
+<div class="page-body">
+    <div class="container-xl">
+        <div class="card">
+            <div class="row g-0">
+                <div class="col-12 col-md-9 d-flex flex-column">
+                    <div class="card-body">
+                        <form action="{{ url_for('tambah_barang') }}" method="POST" enctype="multipart/form-data"
+                            autocomplete="off" novalidate>
+                            <h3 class="card-title">Tambah Barang</h3>
+
+                            <!-- File Upload for Gambar Produk -->
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <input type="file" class="form-control" name="gambar_produk" required />
+                                </div>
+                            </div>
+
+                            <h3 class="card-title mt-4">Detail Produk</h3>
+                            <div class="row g-3">
+                                <div class="col-md">
+                                    <div class="form-label">Nama Produk</div>
+                                    <input type="text" class="form-control" placeholder="Masukkan Nama Produk"
+                                        name="nama_produk" required>
+                                </div>
+                                <div class="col-md">
+                                    <div class="form-label">Harga (Rupiah)</div>
+                                    <input type="number" step="0.01" class="form-control" placeholder="Masukkan Harga"
+                                        name="harga" required>
+                                </div>
+                            </div>
+                            <br>
+
+                            <div class="row g-3">
+                                <div class="col-md">
+                                    <div class="form-label">Kategori</div>
+                                    <select class="form-control" name="kategori_id" required>
+                                        {% for k in kategori %}
+                                        <option value="{{ k['id'] }}">{{ k['nama_kategori'] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md">
+                                    <div class="form-label">Stok</div>
+                                    <input type="number" class="form-control" placeholder="Masukkan Stok" name="stok"
+                                        required>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="col-md">
+                                <div class="form-label">Deskripsi</div>
+                                <textarea class="form-control" placeholder="Masukkan Deskripsi" name="deskripsi"
+                                    required></textarea>
+                            </div>
+
+                            <div class="card-footer bg-transparent mt-auto">
+                                <div class="btn-list justify-content-end">
+                                    <a href="/dashboard_barang/" class="btn">
+                                        Cancel
+                                    </a>
+                                    <button type="submit" id="submit-button" class="btn btn-primary">
+                                        Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

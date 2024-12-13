@@ -1,0 +1,41 @@
+{% extends "base_admin.html" %}
+{% block title %}Chat - Take Home{% endblock %}
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+  integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+  crossorigin="anonymous"></script>
+<div class="page page-center">
+  <div class="container container-tight py-4">
+    <div class="text-center mb-4">
+      <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
+        <img src="{{ url_for('static', filename='img/logo2.png') }}" height="36" alt="">
+      </a>
+    </div>
+    <form method="post" class="buttons">
+      <div class="card card-md">
+        <div class="card-body text-center">
+          <h2 class="card-title mb-4">Enter The Chat Room</h2>
+          <p class="text-secondary mb-4">
+            <div>
+              <label class="form-label">Nama Anda Di Dalam Chat : </label>
+              <input type="text" class="form-control" name="name" placeholder="Pick a name!" value="{{ name }}">
+            </div>
+          </p>
+
+          <div class="form-label">Select a Room</div>
+          <select name="code" class="form-select">
+            <option value="">Select a Room</option>
+            {% for room in rooms %}
+            <option value="{{ room['room_name'] }}">{{ room['room_name'] }}</option>
+            {% endfor %}
+          </select>
+          <br><br>
+          <button type="submit" name="join" class="create-btn btn btn-primary w-100">
+            Join a Room
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

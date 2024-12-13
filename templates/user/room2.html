@@ -1,0 +1,124 @@
+{% extends 'base_user.html' %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+  integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+  crossorigin="anonymous"></script>
+<div class="page-body">
+  <div class="container-xl">
+    <div class="card">
+      <div class="row g-0">
+        <div class="col-12 col-lg-12 col-xl-12 d-flex flex-column message-box">
+          <div class="card-body scrollable" style="height: 35rem">
+            <div class="chat">
+              <div class="chat-bubbles" id="messages">
+                {% for message in messages %}
+                <div class="chat-item">
+                  <div class="row align-items-end justify-content-end">
+                    <div class="col col-lg-4">
+                      <div class="chat-bubble chat-bubble-me">
+                        <div class="chat-bubble-title">
+                          <div class="row">
+                            <div class="col chat-bubble-author">
+                              <h3>{{ message.sender_name }}</h3>
+                            </div>
+                            <div class="col-auto chat-bubble-date">
+                              <p>{{ message.created_at }}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="chat-bubble-body">
+                          <p>{{ message.message }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <div class="input-group input-group-flat inputs">
+              <input type="text" class="form-control" autocomplete="off" placeholder="Type message" name="message"
+                id="message" />
+              <button type="button" name="send" id="send-btn" class="btn btn-outline-primary" onClick="sendMessage()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="icon icon-tabler icons-tabler-outline icon-tabler-send">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M10 14l11 -11" />
+                  <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  var socketio = io();
+
+  const messages = document.getElementById("messages");
+
+  // Function to create a new message element in the chat
+  const createMessage = (name, msg, created_at) => {
+    const div = document.createElement("div");
+    div.classList.add("chat-item");
+    div.innerHTML = `
+              <div class="chat-bubbles" id="messages">
+                <div class="chat-item">
+                  <div class="row align-items-end justify-content-end">
+                    <div class="col col-lg-4">
+                      <div class="chat-bubble chat-bubble-me">
+                        <div class="chat-bubble-title">
+                          <div class="row">
+                            <div class="col chat-bubble-author">
+                              <h3>${name}</h3>
+                            </div>
+                            <div class="col-auto chat-bubble-date">
+                              <p>${new Date(created_at).toLocaleString()}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="chat-bubble-body">
+                          <p>${msg}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+    `;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight; // Scroll to bottom
+  };
+
+  // Listen for messages sent from the server and add them to the chat
+  socketio.on("message", (data) => {
+    createMessage(data.name, data.message, data.created_at);
+  });
+
+  // Send message function when the send button is clicked
+  const sendMessage = () => {
+    const message = document.getElementById("message");
+    if (message.value === "") return;
+
+    socketio.emit("message", {
+      data: message.value
+    });
+
+    message.value = ""; // Clear the input after sending
+  };
+
+  // Add event listener for Enter key
+  document.getElementById("message").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      sendMessage();
+      event.preventDefault(); // Prevent the default Enter key behavior (form submission, etc.)
+    }
+  });
+</script>
+{% endblock %}

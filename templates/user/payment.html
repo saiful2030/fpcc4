@@ -1,0 +1,59 @@
+{% extends "base_user.html" %}
+{% block title %}Payment - Take Home{% endblock %}
+{% block content %}
+<div class="page page-center">
+    <div class="container container-tight py-4">
+        <div class="text-center mb-4">
+            <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
+                <img src="{{ url_for('static', filename='img/logo2.png') }}" height="36" alt="">
+            </a>
+        </div>
+        <div class="card card-md">
+            <div class="card-body text-center">
+                <h2 class="card-title mb-4">Payment</h2>
+                <p class="text-secondary mb-4">
+                    Silakan lakukan pembayaran
+                </p>
+                <button id="pay-button" class="btn btn-primary w-100">Bayar Sekarang</button>
+                <script type="text/javascript">
+                    var payButton = document.getElementById('pay-button');
+                    payButton.addEventListener('click', function () {
+                        // Mengosongkan keranjang langsung setelah tombol diklik
+                        fetch('{{ url_for("delete_all_cart_items") }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error clearing cart:", error);
+                            });
+
+                        // Trigger Snap.js payment popup
+                        window.snap.pay('{{ transaction_token }}', {
+                            onSuccess: function (result) {
+                                // After successful payment, redirect to the dashboard
+                                window.location.href = "{{ url_for('dashboard_buyer') }}";
+                            },
+                            onPending: function (result) {
+                                // If the payment is pending, you can handle accordingly
+                                window.location.href = "{{ url_for('dashboard_buyer') }}";
+                            },
+                            onError: function (result) {
+                                // If there is an error in payment, you can handle it
+                                console.log(result);
+                                alert('Pembayaran gagal, silakan coba lagi.');
+                            },
+                            onClose: function () {
+                                // When the Snap.js popup is closed, redirect to the dashboard
+                                window.location.href = "{{ url_for('dashboard_buyer') }}";
+                            }
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

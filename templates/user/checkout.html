@@ -1,0 +1,96 @@
+{% extends "base_user.html" %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h2 class="mb-4">Checkout</h2>
+    <form action="{{ url_for('checkout') }}" method="POST">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="mb-4">Informasi Pengiriman</h5>
+                        <div class="mb-3">
+                            <label for="nama_lengkap" class="form-label">Nama Lengkap:</label>
+                            <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap"
+                                value="{{ user_data.username }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email:</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                value="{{ user_data.email }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="alamat" class="form-label">Alamat:</label>
+                            <textarea class="form-control" id="alamat" name="alamat" rows="4"
+                                required>{{ user_data.alamat }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="kota" class="form-label">Kota:</label>
+                            <input type="text" class="form-control" id="kota" name="kota" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="kode_pos" class="form-label">Kode Pos:</label>
+                            <input type="text" class="form-control" id="kode_pos" name="kode_pos" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="no_telepon" class="form-label">No Telepon:</label>
+                            <input type="text" class="form-control" id="no_telepon" name="no_telepon"
+                                value="{{ user_data.nomer_hp }}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Ringkasan Belanja -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="mb-4">Ringkasan Belanja</h5>
+                        <ul class="list-group mb-3">
+                            {% for item in cart_items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ item.nama_produk }} ({{ item.jumlah_barang }} x {{ item.harga | rupiah }})
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <p class="d-flex justify-content-between">
+                            <span>Total:</span>
+                            <span class="fw-bold">{{ total_harga | rupiah }}</span>
+                        </p>
+                        <input type="hidden" name="total_harga" value="{{ total_harga }}">
+                        <button type="submit" class="btn btn-primary w-100">Proses Checkout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {% if snap_token %}
+    <div class="mt-4">
+        <button id="pay-button" class="btn btn-success w-100">Bayar Sekarang</button>
+    </div>
+    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="SB-Mid-client-pNHI-sG8bPdq2_9l"></script>
+    <script type="text/javascript">
+        document.getElementById('pay-button').addEventListener('click', function () {
+            snap.pay('{{ snap_token }}', {
+                onSuccess: function (result) {
+                    alert("Pembayaran berhasil!");
+                    console.log(result);
+                },
+                onPending: function (result) {
+                    alert("Pembayaran tertunda.");
+                    console.log(result);
+                },
+                onError: function (result) {
+                    alert("Pembayaran gagal.");
+                    console.log(result);
+                }
+            });
+        });
+    </script>
+    {% endif %}
+</div>
+{% endblock %}

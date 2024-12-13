@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Login - Take Home{% endblock %}
+
+{% block content %}
+<div class="row g-0 flex-fill">
+    <div class="col-12 col-lg-6 col-xl-4 border-top-wide border-primary d-flex flex-column justify-content-center">
+        <div class="container container-tight my-5 px-lg-5">
+            <div class="text-center mb-4">
+                <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
+                    <img src="{{ url_for('static', filename='img/logo2.png') }}" height="36" alt="">
+                </a>
+
+            </div>
+            <h2 class="h3 text-center mb-3">
+                Login to your account
+            </h2>
+            <form id="login-form" action="{{ url_for('login') }}" method="POST" autocomplete="off" novalidate>
+                <div class="mb-3">
+                    <label class="form-label">Email address</label>
+                    <input type="email" class="form-control" placeholder="Masukkan Email Anda" autocomplete="off"
+                        name="email">
+                    <div id="email-error" class="text-danger small mt-1"></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">
+                        Password
+                        <span class="form-label-description">
+                            <a href="/reset-password">I forgot password</a>
+                        </span>
+                    </label>
+                    <div class="input-group input-group-flat">
+                        <input type="password" class="form-control" placeholder="Masukkan Password Anda"
+                            autocomplete="off" name="password">
+                    </div>
+                    <div id="password-error" class="text-danger small mt-1"></div>
+                </div>
+                <div class="form-footer">
+                    <button type="submit" class="btn btn-primary w-100">Sign in</button>
+                </div>
+                <div class="hr-text">or</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <a href="{{ url_for('google_login') }}" class="btn btn-primary w-100">Login with Google</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="text-center text-secondary mt-3">
+                Don't have account yet? <a href="/register/" tabindex="-1">Sign up</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6 col-xl-8 d-none d-lg-block">
+        <!-- Photo -->
+        <div class="bg-cover h-100 min-vh-100"
+            style="background-image: url({{ url_for('static', filename='img/logo.png') }})">
+        </div>
+
+    </div>
+</div>
+<script>
+    document.getElementById('login-form').addEventListener('submit', function (event) {
+        // Ambil nilai input
+        const emailInput = document.querySelector('input[name="email"]');
+        const passwordInput = document.querySelector('input[name="password"]');
+        const emailError = document.getElementById('email-error');
+        const passwordError = document.getElementById('password-error');
+
+        // Reset pesan error
+        emailError.textContent = '';
+        passwordError.textContent = '';
+
+        let isValid = true;
+
+        // Validasi Email
+        if (!emailInput.value.trim()) {
+            emailError.textContent = 'Email harus diisi.';
+            isValid = false;
+        }
+
+        // Validasi Password
+        if (!passwordInput.value.trim()) {
+            passwordError.textContent = 'Password harus diisi.';
+            isValid = false;
+        }
+
+        // Jika tidak valid, hentikan pengiriman formulir
+        if (!isValid) {
+            event.preventDefault();
+        }
+    });
+</script>
+
+
+{% endblock %}

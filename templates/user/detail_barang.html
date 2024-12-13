@@ -1,0 +1,158 @@
+{% extends "base_user.html" %}
+
+{% block title %}Detail Produk{% endblock %}
+
+{% block content %}
+<div class="page">
+    <!-- Navbar -->
+    <div class="page-wrapper">
+        <!-- Page header -->
+        <div class="page-header d-print-none">
+            <div class="container-xl">
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        <h2 class="page-title">
+                            Detail Produk
+                        </h2>
+                        <br>
+                        <a href="{{ url_for('dashboard_buyer') }}" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-left">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M5 12l14 0" />
+                                <path d="M5 12l6 6" />
+                                <path d="M5 12l6 -6" /></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- Page body -->
+        <div class="page-body">
+            <div class="container-xl">
+                <!-- Display product details -->
+                <div class="row row-cards">
+                    <div class="col-md-6">
+                        <div class="row row-cards">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3" style="width: 80%;">
+                                            <img src="{{ url_for('static', filename='uploads/profile_pics/' + barang['gambar_produk']) }}"
+                                                class="card-img-top">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row row-cards">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">{{ barang['nama_produk'] }}</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>
+                                            {{ barang['teks_deskripsi'] }}
+                                        </p>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4>{{ barang['harga'] | rupiah }}</h4>
+
+                                    </div>
+                                    <div class="card-footer text-center">
+                                        <div>
+                                            <button id="decrement-btn" class="btn btn-primary">-</button>
+                                            <span id="quantity" class="btn btn-primary">0</span>
+                                            <button id="increment-btn" class="btn btn-primary">+</button>
+                                            <button id="add-to-cart-btn" class="btn btn-primary">Add to Cart</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal untuk Notifikasi -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalLabel">Notifikasi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalMessage">
+                <!-- Pesan akan diubah dengan JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let quantity = 0;
+
+    // Tombol Increment
+    document.getElementById('increment-btn').addEventListener('click', () => {
+        quantity++;
+        document.getElementById('quantity').textContent = quantity;
+    });
+
+    // Tombol Decrement
+    document.getElementById('decrement-btn').addEventListener('click', () => {
+        if (quantity > 0) {
+            quantity--;
+            document.getElementById('quantity').textContent = quantity;
+        }
+    });
+
+    // Fungsi untuk menampilkan modal dengan pesan tertentu
+    function showModal(message) {
+        document.getElementById('modalMessage').textContent = message;
+        var myModal = new bootstrap.Modal(document.getElementById('notificationModal'));
+        myModal.show();
+    }
+
+    // Tombol Add to Cart
+    document.getElementById('add-to-cart-btn').addEventListener('click', () => {
+        // Ganti ini dengan cara pengambilan ID produk yang sesuai
+        const productId = "{{ barang['product_id'] }}"; // Pastikan ini sudah di-render oleh server-side
+
+        // Validasi jumlah
+        if (quantity <= 0) {
+            showModal('Kuantitas tidak boleh 0.');
+            return;
+        }
+
+        // Mengirim request untuk menambahkan ke keranjang
+        fetch('/add_to_cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    productId: productId,
+                    quantity: quantity
+                })
+            }).then(response => response.json())
+            .then(data => {
+                showModal('Berhasil menambahkan ke keranjang.');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showModal('Terjadi kesalahan, coba lagi.');
+            });
+    });
+</script>
+{% endblock %}

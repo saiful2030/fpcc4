@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Take Home{% endblock %}
+{% block content %}
+<div class="page">
+    <!-- Navbar -->
+    <header class="navbar navbar-expand-md d-print-none">
+        <div class="container-xl">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
+                aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+                <a href="{{ url_for('index') }}" class="navbar-brand navbar-brand-autodark">
+                    <img src="{{ url_for('static', filename='img/logo2.png') }}" height="36" alt="">
+                </a>
+            </h1>
+            <div class="navbar-nav flex-row order-md-last">
+                <div class="nav-item d-none d-md-flex me-3">
+                    <div class="btn-list">
+                        <a href="/login/" type="button" class="btn btn-primary">Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-wrapper">
+        <!-- Page header -->
+        <div class="navbar">
+            <div class="container-xl">
+                <div class="my-2 my-md-0 flex-grow-1 ">
+                    <form action="./" method="get" autocomplete="off" novalidate>
+                        <div class="input-icon">
+                            <span class="input-icon-addon">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                                    <path d="M21 21l-6 -6" /></svg>
+                            </span>
+                            <input type="text" id="search-input" class="form-control" aria-label="Search barang"
+                                placeholder="Search barang...">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Page body -->
+        <div class="page-body">
+            <div class="container-xl">
+                <div class="row g-4">
+                    <div class="col-3">
+                        <div class="subheader mb-2">Kategori</div>
+                        <form id="filter-form" method="get">
+                            {% for k in kategori %}
+                            <div class="mb-3">
+                                <label class="form-check">
+                                    <input type="checkbox" class="form-check-input kategori-checkbox" name="kategori"
+                                        value="{{ k['id'] }}" {% if k['id'] in kategori_filter %}checked{% endif %}>
+                                    <span class="form-check-label">{{ k['nama_kategori'] }}</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </form>
+                    </div>
+                    <div class="col-9">
+                        <div class="row row-cards" id="barang-list">
+                            {% for b in barang %}
+                            <div class="col-sm-6 col-lg-4 product-item">
+                                <div class="card card-sm">
+                                    <a href="#" class="btn" data-bs-toggle="modal" data-bs-target="#modal-small">
+                                        <img src="{{ url_for('static', filename='uploads/profile_pics/' + b['gambar_produk']) }}"
+                                            class="card-img-top" alt="Image">
+                                    </a>
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <a href="#"><span class="avatar me-3 rounded"
+                                                    style="background-image: url({{ url_for('static', filename='uploads/profile_pics/default.jpg') }})"></span></a>
+                                            <div>
+                                                <div>{{ b['nama_produk'] }}</div>
+                                                <div class="text-secondary">{{ b['harga'] | rupiah }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal modal-blur fade" id="modal-small" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Take Home</div>
+                <div>Anda belum login</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                    data-bs-dismiss="modal">Cancel</button>
+                <a href="/login/" type="button" class="btn btn-primary">Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Ambil semua checkbox
+    const checkboxes = document.querySelectorAll('.kategori-checkbox');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            // Ambil form
+            const form = document.getElementById('filter-form');
+
+            // Submit form secara otomatis
+            form.submit();
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("search-input");
+        const productList = document.getElementById("barang-list");
+        const products = productList.querySelectorAll(".product-item");
+
+        searchInput.addEventListener("input", function () {
+            const query = searchInput.value.toLowerCase();
+
+            products.forEach(product => {
+                const productName = product.querySelector(".card-body div").textContent
+                    .toLowerCase();
+                if (productName.includes(query)) {
+                    product.style.display = ""; // Show product
+                } else {
+                    product.style.display = "none"; // Hide product
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}
